@@ -25,23 +25,26 @@ blocksizes = [512, 1024, 4096, 8192, 262144, 524288, 1048576, 16777216, \
                33554432, 67108864, 268435456,  536870912, 1073741824]
 
 def removefiles():
+    """remove all temporary files, specifically FILENAME, RANDFILE """
     ret = subprocess.call(['rm','-f', FILENAME, RANDFILE])
     if ret == 0:
         return 1
     else:
         return 0    
 
-def blockprint(num):
-    if num%GB == 0:
-        return str(num/GB) + 'G'
-    elif num%MB == 0:
-        return str(num/MB) + 'M'
-    elif num%KB == 0:
-        return str(num/KB) + 'K'
+def blockprint(blocksize):
+    """ return formatted string of human readable block size unit like 1G """
+    if blocksize % GB == 0:
+        return '{0}G'.format(str(blocksize / GB))
+    elif blocksize % MB == 0:
+        return '{0}M'.format(str(blocksize / MB))
+    elif blocksize % KB == 0:
+        return '{0}K'.format(str(blocksize / KB))
     else:
-        return num
+        return blocksize
 
 def tableprint(results, test):
+    """ print tabulated results to user """
     count = 1
     if results:
         print('\n\t\t'+ test)
@@ -56,10 +59,11 @@ def tableprint(results, test):
         print('Error: Empty list received upon table printing')
 
 def quick_data_access():
+    """ Evaluate block size when information is readily available """
     quickaccess = []
     for element in reversed(blocksizes):
-        pipe1 =  subprocess.Popen(['dd', 'if=/dev/zero' , 'of='+FILENAME, \
-            'bs='+str(element), 'count='+str(GB/element)], \
+        pipe1 =  subprocess.Popen(['dd', 'if=/dev/zero' , 'of=' + FILENAME, \
+            'bs=' + str(element), 'count=' + str(GB/element)], \
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         pipe1.wait()
         for line in pipe1.stderr:
@@ -71,6 +75,7 @@ def quick_data_access():
     tableprint(sorted(quickaccess, key=itemgetter(1)), 'Quick Access to Data')
 
 def make_rand_file():
+    """ Create file of size 1GB consistent of pseudo random data """
     ret = subprocess.call(['dd','if=/dev/urandom','of='+RANDFILE,'bs=4096','count=262144'], stderr=subprocess.PIPE)
     if ret == 0 and os.path.isfile('rand.file'):
         return 1
@@ -78,6 +83,7 @@ def make_rand_file():
         return 0
 
 def same_disk_file_access():
+    """ Evaluate block size when data is I/O dependent """
     samediskaccess = []
     if make_rand_file() == 1:
         for element in reversed(blocksizes):
@@ -91,12 +97,12 @@ def same_disk_file_access():
                     samediskaccess.append([int(element), decimal.Decimal(parted[0].rstrip(' s')),\
                      decimal.Decimal(parted[2].rstrip('\n').rstrip('  MB/s'))])
     else:
-        print('Error: Random Test file '+RANDFILE+' does not exist')
+        print('Error: Random Test file ' + RANDFILE + ' does not exist')
     tableprint(sorted(samediskaccess, key=itemgetter(1)), 'Same Disk File Access')
 
 if __name__ == '__main__':
     print('Best-Block is now creating temp files and measuring performance.')
-    print('-Please be patient as this may take some time.')
+    print('Please be patient as this may take some time.')
     if removefiles():
         quick_data_access()
         same_disk_file_access()
