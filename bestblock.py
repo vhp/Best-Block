@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#   Author: Vincent Perricone <vhp lavabit com>
+#   Author: Vincent Perricone <vhp@lavabit.com>
 #   Date: 4/6/2011
 #   Title: Best Block - bestblock.py
 #   Description: Best Block is a simple script used to find your systems
@@ -111,7 +111,7 @@ def same_disk_file_access():
                         Decimal(dd_data[2].rstrip('\n').rstrip('  MB/s'))]))
     else:
         print('Error: Random Test file {0} does not exist'.format(RANDFILE))
-    print_table(sorted(results_list, key=itemgetter(1)), 'Same Disk File Access')
+    print_table(sorted(results_list,key=itemgetter(1)), 'Same Disk File Access')
 
 if __name__ == '__main__':
     print('Best Block is now measuring your systems performance.')
