@@ -14,7 +14,7 @@ import subprocess
 from operator import itemgetter
 from decimal import Decimal
 
-FILENAME = 'temp.file'
+TEMPFILE = 'temp.file'
 RANDFILE = 'rand.file'
 
 KB = 1024 
@@ -24,19 +24,18 @@ GB = 1024 * 1024 * 1024
 blocksizes = [512, 1024, 4096, 8192, 262144, 524288, 1048576, 16777216,
                33554432, 67108864, 268435456,  536870912, 1073741824]
 
-def remove_files():
-    """ remove all temporary files """
-    return_value = subprocess.call(['rm','-f', FILENAME, RANDFILE])
-    sync()
-    if return_value == 0:
-        return 1
-    else:
-        return 0    
-
 def sync():
     """ Flush filesystem buffers. """
     sync_retcode = subprocess.call(['sync'])
-        
+
+def remove_files():
+    """ remove all temporary files """
+    try:
+        for delible in [TEMPFILE, RANDFILE]:
+            os.unlink(delible)
+    except OSError:
+        pass
+    sync()        
 
 def pretty_blocks(blocksize):
     """ Return formatted string of human readable block size unit like 1G """
@@ -70,7 +69,7 @@ def quick_data_access():
     results_list = []
     for blocksize in reversed(blocksizes):
         dd_subprocess = (subprocess.Popen(['dd', 'if=/dev/zero',
-                        'of=' + FILENAME,
+                        'of=' + TEMPFILE,
                         'bs=' + str(blocksize), 
                         'count=' + str(GB / blocksize), 'conv=fsync'],
                         stdout=subprocess.PIPE, stderr=subprocess.PIPE))
@@ -99,7 +98,7 @@ def same_disk_file_access():
     if create_random_file() == 1:
         for blocksize in reversed(blocksizes):
             dd_subprocess = (subprocess.Popen(['dd', 'if=' + "/dev/urandom" , 
-                            'of=' + FILENAME, 'bs=' + str(blocksize),
+                            'of=' + TEMPFILE, 'bs=' + str(blocksize),
                             'count=' + str(GB / blocksize), 'conv=fsync'],
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE))
             dd_subprocess.wait()
@@ -116,10 +115,7 @@ def same_disk_file_access():
 if __name__ == '__main__':
     print('Best Block is now measuring your systems performance.')
     print('Please be patient as this may take some time.')
-    if remove_files():
-        sync()
-        #quick_data_access()
-        #same_disk_file_access()
-    else:
-        print('Error: Could not properly erase temp files.')
+    remove_files()
+    quick_data_access()
+    same_disk_file_access()
     remove_files()
