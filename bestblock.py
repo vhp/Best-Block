@@ -35,8 +35,8 @@ def remove_files():
 
 def sync():
     """ Flush filesystem buffers. """
-    sync_pipe = subprocess.Popen(['sync'])
-    sync_pipe.wait()
+    sync_retcode = subprocess.call(['sync'])
+        
 
 def pretty_blocks(blocksize):
     """ Return formatted string of human readable block size unit like 1G """
@@ -118,8 +118,8 @@ if __name__ == '__main__':
     print('Please be patient as this may take some time.')
     if remove_files():
         sync()
-        quick_data_access()
-        same_disk_file_access()
+        #quick_data_access()
+        #same_disk_file_access()
     else:
         print('Error: Could not properly erase temp files.')
     remove_files()
