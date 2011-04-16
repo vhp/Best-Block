@@ -26,7 +26,7 @@ blocksizes = [512, 1024, 4096, 8192, 262144, 524288, 1048576, 16777216,
 
 def sync():
     """ Flush filesystem buffers. """
-    sync_retcode = subprocess.call(['sync'])
+    subprocess.call(['sync'])
 
 def remove_files():
     """ remove all temporary files """
