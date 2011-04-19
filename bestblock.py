@@ -17,7 +17,7 @@ from decimal import Decimal
 TEMPFILE = 'temp.file'
 RANDFILE = 'rand.file'
 
-KB = 1024 
+KB = 1024
 MB = 1024 * 1024
 GB = 1024 * 1024 * 1024
 
@@ -35,7 +35,7 @@ def remove_files():
             os.unlink(delible)
     except OSError:
         pass
-    sync()        
+    sync()
 
 def pretty_blocks(blocksize):
     """ Return formatted string of human readable block size unit like 1G """
@@ -70,7 +70,7 @@ def quick_data_access():
     for blocksize in reversed(blocksizes):
         dd_subprocess = (subprocess.Popen(['dd', 'if=/dev/zero',
                         'of=' + TEMPFILE,
-                        'bs=' + str(blocksize), 
+                        'bs=' + str(blocksize),
                         'count=' + str(GB / blocksize), 'conv=fsync'],
                         stdout=subprocess.PIPE, stderr=subprocess.PIPE))
         dd_subprocess.wait()
@@ -97,7 +97,7 @@ def same_disk_file_access():
     results_list = []
     if create_random_file() == 1:
         for blocksize in reversed(blocksizes):
-            dd_subprocess = (subprocess.Popen(['dd', 'if=' + "/dev/urandom" , 
+            dd_subprocess = (subprocess.Popen(['dd', 'if=' + "/dev/urandom" ,
                             'of=' + TEMPFILE, 'bs=' + str(blocksize),
                             'count=' + str(GB / blocksize), 'conv=fsync'],
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE))
@@ -105,7 +105,7 @@ def same_disk_file_access():
             for line in dd_subprocess.stderr:
                 if 'bytes' in line and 'copied' in line:
                     dd_data = line.partition(', ')[2].partition(', ')
-                    (results_list.append([int(blocksize), 
+                    (results_list.append([int(blocksize),
                         Decimal(dd_data[0].rstrip(' s')),
                         Decimal(dd_data[2].rstrip('\n').rstrip('  MB/s'))]))
     else:
